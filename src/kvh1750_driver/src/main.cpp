@@ -10,7 +10,10 @@
 #include "Ring-Buffer/ringbuffer.h"
 #include <assert.h>
 #include <stdio.h>
-
+#include <iomanip>
+#include <sstream>
+#include <vector>
+#include <cstddef>
 
 using namespace SerialStateMachine;
 using namespace mn::CppLinuxSerial;
@@ -26,23 +29,24 @@ int main()
     ring_buffer_t ring_buffer;
     char buf_arr[1024];
     ring_buffer_init(&ring_buffer, buf_arr, (size_t)sizeof(buf_arr));
-    auto serialPort = std::make_shared<SerialPort>(devname, 921600);;
+    auto serialPort = std::make_shared<SerialPort>(devname, 921600);
 
     // SerialPort serialPort
     serialPort->SetTimeout(0);
     serialPort->Open();
 
-    
-    std::string readData;    
+    std::stringstream ss;
+    std::vector<uint8_t> readData;    
     char tmp[100] = "";
     char str[100];
+    char str2[100];
     while(true)
     {
         readData.clear();
         auto numAvail = serialPort->Available();
         if(numAvail) 
         {
-            serialPort->Read(readData);
+            serialPort->ReadBinary(readData);
             for(int i=0; i<numAvail;i++)
             {
                 ring_buffer_queue(&ring_buffer, readData[i]);
@@ -54,11 +58,16 @@ int main()
                     ring_buffer_dequeue(&ring_buffer, &tmp[i]);
                 }
             }
+            for(auto item : readData)
+            {
+                sprintf(str2, "%x", item);
+                std::cout << str2;
+            }
             
-            sprintf(&str[0], "Value is: %li", ring_buffer_num_items(&ring_buffer));
-            std::cout << tmp << std::endl;
-            std::cout << str << std::endl;
-            // std::cout << readData.c_str() << std::endl;
+            // sprintf(str, "Value is: %li", ring_buffer_num_items(&ring_buffer));
+
+            // sprintf(str2, "BLAH: %u", readData[1]);
+            
         }
     }
 
