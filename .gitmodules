@@ -1,0 +1,6 @@
+[submodule "src/CppLinuxSerial"]
+	path = src/CppLinuxSerial
+	url = https://github.com/gbmhunter/CppLinuxSerial.git
+[submodule "src/Ring-Buffer"]
+	path = src/Ring-Buffer
+	url = https://github.com/AndersKaloer/Ring-Buffer.git
