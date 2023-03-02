@@ -1,6 +1,6 @@
 [submodule "src/CppLinuxSerial"]
-	path = src/CppLinuxSerial
+	path = src/kvh1750_driver/lib/CppLinuxSerial
 	url = https://github.com/gbmhunter/CppLinuxSerial.git
 [submodule "src/Ring-Buffer"]
-	path = src/Ring-Buffer
+	path = src/kvh1750_driver/lib/Ring-Buffer
 	url = https://github.com/AndersKaloer/Ring-Buffer.git
