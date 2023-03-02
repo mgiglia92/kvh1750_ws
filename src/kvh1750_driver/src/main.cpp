@@ -1,13 +1,13 @@
 #include <iostream>
 #include <string>
 // #include <SerialStateMachine/CircularBuffer.hpp>
-#include <SerialStateMachine/StateMachine.hpp>
+// #include <SerialStateMachine/StateMachine.hpp>
 #include <CppLinuxSerial/SerialPort.hpp>
 #include <thread>
 #include <memory>
 #include <stdint.h>
 #include <stdlib.h>
-#include "Ring-Buffer/ringbuffer.h"
+#include "ringbuffer.h"
 #include <assert.h>
 #include <stdio.h>
 #include <iomanip>
@@ -15,7 +15,7 @@
 #include <vector>
 #include <cstddef>
 
-using namespace SerialStateMachine;
+// using namespace SerialStateMachine;
 using namespace mn::CppLinuxSerial;
 
 //Struct to house converted kvh1750 data
