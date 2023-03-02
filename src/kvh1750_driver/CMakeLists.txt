@@ -10,6 +10,8 @@ add_library(buffer "")
 target_sources(buffer PRIVATE "${CMAKE_SOURCE_DIR}/../Ring-Buffer/ringbuffer.c"
     PRIVATE "${CMAKE_SOURCE_DIR}/../Ring-Buffer/ringbuffer.h")
     
+include_directories("${CMAKE_SOURCE_DIR}/../CppLinuxSerial")
+include_directories("${CMAKE_SOURCE_DIR}/../CppLinuxSerial/include")
 include_directories("${CMAKE_SOURCE_DIR}/..")
 # include_directories(bufftest PRIVATE "${CMAKE_SOURCE_DIR}/../include")
 include_directories("/usr/include")

@@ -83,7 +83,7 @@ bool search_parser(SerialParser *parser)
     if(numItems > size_t(36))
     {
         //Find 0xFE
-        //TODO: Search from end for valid message (BOM and length) and use that instead
+        //TODO: Search from end for valid message (BOM and length) and use that cdinstead
         for(ring_buffer_size_t i=0; i<numItems; i++)
         {
 
