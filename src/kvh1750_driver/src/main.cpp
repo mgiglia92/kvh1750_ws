@@ -163,7 +163,10 @@ int main()
             std::cout << parser.ringBuffer.buffer[parser.ringBuffer.tail_index] << std::endl;
             if(extract_valid_message(&parser))
             {
-                std::cout << str;
+                std::cout << str; 
+                // status and CRC check
+                // convert bytes into proper types
+                // populate ROS message
             }
         }
     }
