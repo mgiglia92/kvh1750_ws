@@ -45,35 +45,32 @@ uint8_t current[] = { // actually size 36
 // uint32_t data2 = 0x38586C1F;
 
 void convert_bytes(Kvh1750Data* imudata, uint8_t *bytearray, size_t len){
-uint32_t Wx, Wy, Wz, Ax, Ay, Az;
-uint8_t stat, seq;
-int16_t Temp;
+uint32_t Wx=0, Wy=0, Wz=0, Ax=0, Ay=0, Az=0;
+uint8_t status=0, seq=0;
+int16_t temp=0;
 
-for (int i = 0; i<4; i++){
-    uint32_t temp1 = ((uint32_t) current[4 + i]) << (24 - 8*i);
-    Wx |= temp1;
-    uint32_t temp2 = ((uint32_t) current[8 + i]) << (24 - 8*i);
-    Wy |= temp2;
-    uint32_t temp3 = ((uint32_t) current[12 + i]) << (24 - 8*i);
-    Wz |= temp3;
-    uint32_t temp4 = ((uint32_t) current[16 + i]) << (24 - 8*i);
-    Ax |= temp4;
-    uint32_t temp5 = ((uint32_t) current[20 + i]) << (24 - 8*i);
-    Ay |= temp5;
-    uint32_t temp6 = ((uint32_t) current[24 + i]) << (24 - 8*i); 
-    Az |= temp6; 
-    } // lmao
+// for (int i = 0; i<4; i++){
+//     Wx |= ((uint32_t) current[4 + i]) << (24 - 8*i);
+//     Wy |= ((uint32_t) current[8 + i]) << (24 - 8*i);
+//     Wz |= ((uint32_t) current[12 + i]) << (24 - 8*i);
+//     Ax |= ((uint32_t) current[16 + i]) << (24 - 8*i);
+//     Ay |= ((uint32_t) current[20 + i]) << (24 - 8*i);
+//     Az |= ((uint32_t) current[24 + i]) << (24 - 8*i); 
+// } 
 
-    stat = ((uint8_t current[29]));
-    seq = ((uint8_t current[30]));
+    Wx = ((uint32_t) current[4]) << 24 | ((uint32_t) current[5]) << 16 | ((uint32_t) current[6]) << 8 | ((uint32_t) current[7]);
+    Wy = ((uint32_t) current[8]) << 24 | ((uint32_t) current[9]) << 16 | ((uint32_t) current[10]) << 8 | ((uint32_t) current[11]);
+    Wz = ((uint32_t) current[12]) << 24 | ((uint32_t) current[13]) << 16 | ((uint32_t) current[14]) << 8 | ((uint32_t) current[15]);
+
+    Ax = ((uint32_t) current[16]) << 24 | ((uint32_t) current[17]) << 16 | ((uint32_t) current[18]) << 8 | ((uint32_t) current[19]);
+    Ay = ((uint32_t) current[20]) << 24 | ((uint32_t) current[21]) << 16 | ((uint32_t) current[22]) << 8 | ((uint32_t) current[23]);
+    Az = ((uint32_t) current[24]) << 24 | ((uint32_t) current[25]) << 16 | ((uint32_t) current[26]) << 8 | ((uint32_t) current[27]);
+
+    status = (uint8_t) current[28];
+    seq = (uint8_t) current[29];
     
-for (int i = 0; i < 2; i++){
-    int16_t temp7 = ((int16_t) current[31 + i]) << (8 - 8*i);
-    Temp |= temp7;
-}
+    temp = ((uint16_t) current[30]) << 8 | ((uint16_t) current[31]);
 
-
-    
 memcpy(&imuData.wx, &Wx, sizeof(imuData.wx));
 cout << imuData.wx << endl;
 memcpy(&imuData.wy, &Wy, sizeof(imuData.wy));
@@ -88,40 +85,19 @@ cout << imuData.ay << endl;
 memcpy(&imuData.az, &Az, sizeof(imuData.az));
 cout << imuData.az << endl;
 
-memcpy(&imuData.status, &stat, sizeof(imuData.status));
-cout << imuData.status << endl;
-memcpy(&imuData.sequence, &seq, sizeof(imuData.sequence));
-cout << imuData.sequence << endl;
-memcpy(&imuData.temp, &Temp, sizeof(imuData.temp));
+imuData.status = status;
+cout << (uint32_t)imuData.status << endl;
+imuData.sequence = seq;
+cout << (uint32_t)imuData.sequence << endl;
+imuData.temp = temp;
 cout << imuData.temp << endl;
+
 }
 
-// 
 
 int main(){
 
     convert_bytes(&imuData, current, sizeof(current));
 
-    // make this for loop bruh
-    // uint32_t Wx = ((uint32_t)(current[4])) << 24;
-    // Wx |= ((uint32_t)current[5]) << 16;
-    // Wx |= ((uint32_t)current[6]) << 8;
-    // Wx |= (uint32_t)(current[7]); 
-
-    // memcpy(&imuData.wx, &Wx, sizeof(imuData.wx));
-    // cout << imuData.wx << endl;
-
-    // uint32_t Wy = ((uint32_t)(current[8])) << 24;
-    // Wy |= ((uint32_t)current[9]) << 16;
-    // Wy |= ((uint32_t)current[10]) << 8;
-    // Wy |= (uint32_t)(current[11]); 
-
-    // memcpy(&imuData.wx, &Wx, sizeof(imuData.wx));
-    // cout << imuData.wx << endl;
-
-    // memcpy(&imuData.wx, &data1, sizeof(imuData.wx));
-    // cout << imuData.wx << endl; 
-    // memcpy(&imuData.wy, &data2, sizeof(imuData.wy));
-    // cout << imuData.wy << endl; 
 }
 
