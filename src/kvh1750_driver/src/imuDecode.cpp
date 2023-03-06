@@ -46,6 +46,9 @@ uint8_t current[] = { // actually size 36
 
 void convert_bytes(Kvh1750Data* imudata, uint8_t *bytearray, size_t len){
 uint32_t Wx, Wy, Wz, Ax, Ay, Az;
+uint8_t stat, seq;
+int16_t Temp;
+
 for (int i = 0; i<4; i++){
     uint32_t temp1 = ((uint32_t) current[4 + i]) << (24 - 8*i);
     Wx |= temp1;
@@ -57,26 +60,48 @@ for (int i = 0; i<4; i++){
     Ax |= temp4;
     uint32_t temp5 = ((uint32_t) current[20 + i]) << (24 - 8*i);
     Ay |= temp5;
-    uint32_t temp6 = ((uint32_t) current[24 + i]) << (24 - 8*i); // lmao
+    uint32_t temp6 = ((uint32_t) current[24 + i]) << (24 - 8*i); 
     Az |= temp6; 
-    } 
+    } // lmao
+
+    stat = ((uint8_t current[29]));
+    seq = ((uint8_t current[30]));
+    
+for (int i = 0; i < 2; i++){
+    int16_t temp7 = ((int16_t) current[31 + i]) << (8 - 8*i);
+    Temp |= temp7;
+}
+
+
+    
 memcpy(&imuData.wx, &Wx, sizeof(imuData.wx));
 cout << imuData.wx << endl;
 memcpy(&imuData.wy, &Wy, sizeof(imuData.wy));
 cout << imuData.wy << endl;
 memcpy(&imuData.wz, &Wz, sizeof(imuData.wz));
 cout << imuData.wz << endl;
+
 memcpy(&imuData.ax, &Ax, sizeof(imuData.ax));
 cout << imuData.ax << endl;
 memcpy(&imuData.ay, &Ay, sizeof(imuData.ay));
 cout << imuData.ay << endl;
 memcpy(&imuData.az, &Az, sizeof(imuData.az));
 cout << imuData.az << endl;
+
+memcpy(&imuData.status, &stat, sizeof(imuData.status));
+cout << imuData.status << endl;
+memcpy(&imuData.sequence, &seq, sizeof(imuData.sequence));
+cout << imuData.sequence << endl;
+memcpy(&imuData.temp, &Temp, sizeof(imuData.temp));
+cout << imuData.temp << endl;
 }
 
 // 
 
 int main(){
+
+    convert_bytes(&imuData, current, sizeof(current));
+
     // make this for loop bruh
     // uint32_t Wx = ((uint32_t)(current[4])) << 24;
     // Wx |= ((uint32_t)current[5]) << 16;
@@ -94,22 +119,9 @@ int main(){
     // memcpy(&imuData.wx, &Wx, sizeof(imuData.wx));
     // cout << imuData.wx << endl;
 
-    convert_bytes(&imuData, current, sizeof(current));
-
     // memcpy(&imuData.wx, &data1, sizeof(imuData.wx));
     // cout << imuData.wx << endl; 
     // memcpy(&imuData.wy, &data2, sizeof(imuData.wy));
     // cout << imuData.wy << endl; 
 }
 
-
-// /* 
-//     header = <first four bytes>
-
-//     GyroX = <decode next 4>
-//     GyroY = <decode next 4>
-//     GyroZ = ...
-
-//     turn this into imu.msg
-// */
-// }
