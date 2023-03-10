@@ -15,6 +15,12 @@
 #include <vector>
 #include <cstddef>
 
+// ROS libraries
+#include "ros/ros.h"
+#include "sensor_msgs/Imu.h"
+#include "nav_msgs/Odometry.h"
+
+
 // using namespace SerialStateMachine;
 using namespace mn::CppLinuxSerial;
 
@@ -123,8 +129,6 @@ bool search_parser(SerialParser *parser)
 }
 
 
-
-
 int main()
 {
     //Instantiate structs
@@ -148,7 +152,18 @@ int main()
     char str[100];
     char str2[100];
 
-    while(true)
+    //ROS Initialization
+    ros::init(argc, argv, "Imu");
+    ros::NodeHandle n; 
+
+    ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("/imu_info", 2);
+    // ros::Publisher imu_odom_pub = n.advertise<sensor_msgs::Imu>("/imu_odom", 2);
+    rosRate loop_rate(100);
+
+    sensor_msgs::Imu imu_info;
+    // nav_msgs::Odometry imu_odom;
+
+    while(ros::ok())
     {
         readData.clear();
         auto numAvail = serialPort->Available();
@@ -164,9 +179,29 @@ int main()
             if(extract_valid_message(&parser))
             {
                 std::cout << str; 
-                // status and CRC check
-                // convert bytes into proper types
-                // populate ROS message
+
+
+                //status and CRC check
+                //convert bytes into proper types
+                //populate ROS message
+                
+                
+                // radians
+                imu_info.orientation.x = imuData.wx;
+                imu_info.orientation.y = imuData.wy;
+                imu_info.orientation.z = imuData.wz;
+
+                // acceleration measured in m/s^2 not g's
+                imu_info.linear_acceleration.x = imuData.ax;
+                imu_info.linear_acceleration.y = imuData.ay;
+                imu_info.linear_acceleration.z = imuData.az;
+
+                // since we have no linear velocity estimate, set the first element of the covariance matrix to -1
+                imu_info.angular_velocity_covariance[0] = -1;
+
+                imu_pub.publish(imu_info);
+
+                loop_rate.sleep();
             }
         }
     }
