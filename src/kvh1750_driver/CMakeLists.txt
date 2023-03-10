@@ -15,7 +15,8 @@ catkin_package(
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
-
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs nav_msgs sensor_msgs)
+include_directories(${catkin_INCLUDE_DIRS})
 add_executable(bufftest src/main.cpp)
 
 add_subdirectory(lib/CppLinuxSerial)
@@ -32,7 +33,7 @@ include_directories("${CMAKE_SOURCE_DIR}/kvh1750_driver/lib/Ring-Buffer")
 # include_directories(bufftest PRIVATE "${CMAKE_SOURCE_DIR}/../include")
 # include_directories("/usr/include")
 # add_library()
-target_link_libraries(bufftest CppLinuxSerial buffer)
+target_link_libraries(bufftest CppLinuxSerial buffer ${catkin_LIBRARIES})
 
 # target_link_libraries(bufftest SerialStateMachine)
 
