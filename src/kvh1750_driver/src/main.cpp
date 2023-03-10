@@ -128,6 +128,77 @@ bool search_parser(SerialParser *parser)
     return false;
 }
 
+// Returns 1 if the message is valid and 0 if the data is corrupted
+bool status_check(Kvh1750Data* imuData, uint8_t *bytearray){
+    
+    uint8_t health;
+
+    imuData->status = (uint8_t) bytearray[28];
+    cout << "Message Status: "<< (uint32_t)imuData->status << endl; // should be hex
+    
+    health = imuData->status ^ 0x77;
+    if(health != 0){
+        cout << "DATA INVALID: Data is corrupted" << endl;  // modify to show which message is corrupted i.e. Gyro X, Acceleroemter Y, etc.
+        return 0;
+    }
+
+    return 1;
+}
+
+// Returns 0 if message counter is greater than previous
+// Returns -1 otherwise as data is invalid
+int sequence_check(Kvh1750Data* imuData, uint8_t *bytearray, uint8_t prev_seq){
+    
+    imuData->sequence  = (uint8_t) bytearray[29];
+    cout << "Message Counter: "<< (uint32_t)imuData->sequence << endl; // Wrong number I think the manual is wrong, either way we just need to verify tha tconsecutive mesages increment the counter
+
+    if(imuData->sequence > prev_seq || imuData->sequence == 0){
+        return 0;
+    }
+    
+    cout << "DATA INVALID: Incorrect counter" << endl;
+    return -1;
+}
+
+void convert_bytes(Kvh1750Data* imuData, uint8_t *bytearray){
+    
+    uint32_t Wx=0, Wy=0, Wz=0, Ax=0, Ay=0, Az=0;
+    int16_t temp=0;
+
+    Wx = ((uint32_t) bytearray[4]) << 24 | ((uint32_t) bytearray[5]) << 16 | ((uint32_t) bytearray[6]) << 8 | ((uint32_t) bytearray[7]);
+    Wy = ((uint32_t) bytearray[8]) << 24 | ((uint32_t) bytearray[9]) << 16 | ((uint32_t) bytearray[10]) << 8 | ((uint32_t) bytearray[11]);
+    Wz = ((uint32_t) bytearray[12]) << 24 | ((uint32_t) bytearray[13]) << 16 | ((uint32_t) bytearray[14]) << 8 | ((uint32_t) bytearray[15]);
+
+    memcpy(&imuData->wx, &Wx, sizeof(imuData->wx));
+    memcpy(&imuData->wy, &Wy, sizeof(imuData->wy));
+    memcpy(&imuData->wz, &Wz, sizeof(imuData->wz));
+
+    Ax = ((uint32_t) bytearray[16]) << 24 | ((uint32_t) bytearray[17]) << 16 | ((uint32_t) bytearray[18]) << 8 | ((uint32_t) bytearray[19]);
+    Ay = ((uint32_t) bytearray[20]) << 24 | ((uint32_t) bytearray[21]) << 16 | ((uint32_t) bytearray[22]) << 8 | ((uint32_t) bytearray[23]);
+    Az = ((uint32_t) bytearray[24]) << 24 | ((uint32_t) bytearray[25]) << 16 | ((uint32_t) bytearray[26]) << 8 | ((uint32_t) bytearray[27]);
+
+    memcpy(&imuData->ax, &Ax, sizeof(imuData->ax));
+    memcpy(&imuData->ay, &Ay, sizeof(imuData->ay));
+    memcpy(&imuData->az, &Az, sizeof(imuData->az));
+
+    //Convert from g to m/s^2
+    imuData->ax = (imuData->ax)/10;
+    imuData->ay = (imuData->ay)/10;
+    imuData->az = (imuData->az)/10;
+
+    imuData->temp = ((uint16_t) bytearray[30]) << 8 | ((uint16_t) bytearray[31]);
+
+    // cout << "Gyro X: " << imuData->wx << endl;
+    // cout << "Gyro Y: " << imuData->wy << endl;
+    // cout << "Gyro Z: " << imuData->wz << endl;
+
+    // cout << "Accel X: " << imuData->ax << endl;
+    // cout << "Accel Y: " << imuData->ay << endl;
+    // cout << "Accel Z: " << imuData->az << endl;
+
+    // cout << "Temp: " << imuData->temp << endl;
+
+}
 
 int main()
 {
@@ -178,26 +249,33 @@ int main()
             std::cout << parser.ringBuffer.buffer[parser.ringBuffer.tail_index] << std::endl;
             if(extract_valid_message(&parser))
             {
-                std::cout << str; 
-
+                // std::cout << str; 
 
                 //status and CRC check
                 //convert bytes into proper types
                 //populate ROS message
-                
+
+                if(status_check(&imuData, current))
+                    convert_bytes(&imuData, current);
                 
                 // radians
-                imu_info.orientation.x = imuData.wx;
-                imu_info.orientation.y = imuData.wy;
-                imu_info.orientation.z = imuData.wz;
+                imu_info.angular_velocity.x = imuData.wx;
+                imu_info.angular_velocity.y = imuData.wy;
+                imu_info.angular_velocity.z = imuData.wz;
+                imu_info.angular_velocity_covariance[0] = 1;
+                imu_info.angular_velocity_covariance[4] = 1;
+                imu_info.angular_velocity_covariance[8] = 1;
 
                 // acceleration measured in m/s^2 not g's
                 imu_info.linear_acceleration.x = imuData.ax;
                 imu_info.linear_acceleration.y = imuData.ay;
                 imu_info.linear_acceleration.z = imuData.az;
+                imu_info.linear_acceleration_covariance[0] = 1;
+                imu_info.linear_acceleration_covariance[4] = 1;
+                imu_info.linear_acceleration_covariance[8] = 1;
 
                 // since we have no linear velocity estimate, set the first element of the covariance matrix to -1
-                imu_info.angular_velocity_covariance[0] = -1;
+                imu_info.orientation_covariance[0] = -1;
 
                 imu_pub.publish(imu_info);
 
